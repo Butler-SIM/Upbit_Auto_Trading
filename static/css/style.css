@@ -219,7 +219,7 @@ h1, h2, h3, h4, h5, h6 {
     height: 2px;
     bottom: -5px;
     left: 0;
-    background-color: #000000;
+    background-color: rgba(0, 0, 0, 0.09);
     visibility: hidden;
     width: 0px;
     transition: all 0.3s ease-in-out 0s;
@@ -231,7 +231,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .navbar a:hover, .navbar .active, .navbar .active:focus, .navbar li:hover > a {
-    color: #000000;
+    color: #b2b2b2;
 }
 
 .navbar .dropdown ul {
