@@ -5,11 +5,11 @@ from django.urls import path
 import mainapp
 from user.views import *
 
-app_name = 'user2'
+app_name = 'user'
 
 urlpatterns = [
     path('', user, name='user'),
-    path('login', login, name='login'),
-    path('join', join, name='join'),
+    path('login', Login.as_view(), name='login'),
+    path('join', Join.as_view(), name='join'),
 
 ]
