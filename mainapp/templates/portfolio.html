@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include "head.html" %}
+{% include "header.html" %}
+
+<body>
+
+
+<main id="main">
+
+    <!-- ======= Portfolio Section ======= -->
+    <section id="portfolio" class="portfolio">
+        <div class="container" data-aos="fade-up">
+
+            <div class="section-title">
+                <h2>Portfolio</h2>
+
+            </div>
+
+            <div class="row" data-aos="fade-up" data-aos-delay="100">
+                <div class="col-lg-12 d-flex justify-content-center">
+                    <ul id="portfolio-flters">
+                        <li data-filter="*" class="filter-active">All</li>
+                        <li data-filter=".filter-app">App</li>
+                        {#<li data-filter=".filter-card">Card</li>#}
+                        <li data-filter=".filter-web">Web</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row portfolio-container" data-aos="fade-up" data-aos-delay="200">
+
+
+                <!-- ----------------------------------------------web--------------------------------------------------------------------- -->
+
+                {#          <div class="col-lg-4 col-md-6 portfolio-item filter-web">#}
+                {#            <a href="/mainapp/portfolio_details/?id=1"><div class="portfolio-wrap">#}
+                {#              <img src="/static/img/portfolio/portfolio-1.jpg" class="img-fluid" alt="">#}
+                {#              <div class="portfolio-info">#}
+                {#                <h4>Web 1</h4>#}
+                {#                <p>Web</p>#}
+                {#                <div class="portfolio-links">#}
+                {#                  <a href="/static/img/portfolio/portfolio-1.jpg" data-gallery="portfolioGallery" class="portfolio-lightbox" title="App 1"><i class="bx bx-plus"></i></a>#}
+                {#                </div>#}
+                {#              </div>#}
+                {#            </div>#}
+                {#            </a>#}
+                {#          </div>#}
+
+                {% if web_list.size != '' %}
+                    {% for item in web_list %}
+                        <div class="col-lg-4 col-md-6 portfolio-item filter-web">
+                            <a href="/mainapp/portfolio_details/?id={{ item.id }}">
+                                <div class="portfolio-wrap">
+                                    <img src="/media/{{ item.project_main_image }}" class="img-fluid" alt="">
+                                    <div class="portfolio-info">
+                                        <h4>Web {{ item.project_name }}</h4>
+                                        <p>Web</p>
+                                        <div class="portfolio-links">
+                                            <a href="/media/{{ item.project_main_image }}"
+                                               data-gallery="portfolioGallery"
+                                               class="portfolio-lightbox" title="App 1"><i class="bx bx-plus"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                <!-- ----------------------------------------------/web/--------------------------------------------------------------------- -->
+
+                <!-- ----------------------------------------------app--------------------------------------------------------------------- -->
+                {% if app_list.size != '' %}
+                    {% for item in app_list %}
+                        <div class="col-lg-4 col-md-6 portfolio-item filter-app">
+                            <a href="/mainapp/portfolio_details/?id={{ item.id }}">
+                                <div class="portfolio-wrap">
+                                    <img src="/media/{{ item.project_main_image }}" class="img-fluid" alt="">
+                                    <div class="portfolio-info">
+                                        <h4>APP {{ item.project_name }}</h4>
+                                        <p>APP</p>
+                                        <div class="portfolio-links">
+                                            <a href="/media/{{ item.project_main_image }}"
+                                               data-gallery="portfolioGallery"
+                                               class="portfolio-lightbox" title="App 1"><i class="bx bx-plus"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                <!-- ----------------------------------------------/app/--------------------------------------------------------------------- -->
+
+
+            </div>
+        </div>
+    </section><!-- End Portfolio Section -->
+
+</main><!-- End #main -->
+
+<div id="preloader"></div>
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+
+</body>
+
+{% include "footer.html" %}
+
+</html>
