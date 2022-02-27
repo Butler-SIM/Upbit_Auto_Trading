@@ -20,11 +20,11 @@ class Login(generics.ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
 
-        return render(request, 'join.html')
+        return render(request, 'login.html')
 
     def post(self, request, *args, **kwargs):
-        en_kakao_key = encrypt(request.data['kakao'], randomTxt)
-        request.data.update(kakao_key=en_kakao_key)
+        #en_kakao_key = encrypt(request.data['kakao'], randomTxt)
+        #request.data.update(kakao_key=en_kakao_key)
 
         print(request.data)
         return JsonResponse(json_success("S0004", {"CODE": "succes1111"}), status=status.HTTP_200_OK)

@@ -1427,3 +1427,10 @@ section {
     -moz-box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.15);
     box-shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.15)
 }
+
+.login_sns dd a.kakao:before {
+    width: 24px;
+    height: 22px;
+    background: url('../images/login/btn_kakao.png') no-repeat;
+    background-size: 100% auto;
+}

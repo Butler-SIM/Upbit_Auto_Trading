@@ -4,12 +4,52 @@
 {% include "header.html" %}
 <body>
 <main id="main">
-<section id="contact" class="contact">
-<div class="kakao">
-    카카오 로그인 버튼 영역
-
-</div>
-</section>
+    <section id="contact" class="contact">
+        <dl class="login_sns">
+        <dt>SNS 로그인</dt>
+        <dd>
+            <a class="kakao" onclick="javascript:kakaoLogin();">KAKAO</a>
+        </dd>
+    </dl>
+    </section>
 </main>
 </body>
 </html>
+
+<script type='text/javascript'>
+
+
+    // 사용할 앱의 JavaScript 키를 설정해 주세요.
+    Kakao.init('ad3c8eebb312493a5999f3ef40c34d23');
+
+    function kakaoLogin() {
+        Kakao.Auth.login({
+            success: function (data) {
+                Kakao.API.request({
+                    url: '/v2/user/me',
+                    success: function (response) {
+                        $('#token').val(data.access_token);
+                        $('#kakaoId').val(response.id);
+                        $('#kakaoEmail').val(response.kakao_account.email);
+                        $('#kakaoAction').submit();
+                    },
+                    fail: function (error) {
+                        console.log(error)
+                    },
+                })
+            },
+            fail: function (error) {
+                console.log(error)
+            },
+        });
+    }
+
+    /**
+     * 기존 아이디에 SNS 연동 처리.
+     **/
+    function snsConnection() {
+        $('#snsConnection').submit();
+    }
+
+
+</script>
