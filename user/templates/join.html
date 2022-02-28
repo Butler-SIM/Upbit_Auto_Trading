@@ -7,7 +7,8 @@
             <form class="validation-form" novalidate>
                 <div class="row">
                     <div class="col-md-6 mb-3"><label for="nickname">닉네임</label>
-                        <input type="text" class="form-control" id="nickname" placeholder="" value="" required maxlength="8">
+                        <input type="text" class="form-control" id="nickname" placeholder="" value="" required
+                               maxlength="8">
                         <div class="invalid-feedback"> 닉네임을 입력해주세요.</div>
                     </div>
                 </div>
@@ -16,40 +17,69 @@
 
                     <div class="invalid-feedback"> 이메일을 입력해주세요.</div>
                 </div>
-
+                {{ enc_kakao_id }}
 
                 <hr class="mb-4">
                 <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input"
                                                                    id="aggrement" required> <label
                         class="custom-control-label" for="aggrement">개인정보 수집 및 이용에 동의합니다.</label></div>
                 <div class="mb-4"></div>
-                <button class="btn btn-primary btn-lg btn-block" type="submit">가입 완료</button>
+                <button class="btn btn-primary btn-lg btn-block" id="joinButton" type="button">가입 완료</button>
             </form>
         </div>
     </div>
-
+    <input type="hidden" id = "kakao" value="{{ request.session.enc_kakao_id }}">
 </div>
 
 </body>
 </html>
 <script>
-    window.addEventListener('load', () => {
-        const forms = document.getElementsByClassName('validation-form');
-        Array.prototype.filter.call(forms, (form) => {
-            form.addEventListener('submit', function (event) {
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                } else {
-                    alert("233")
-                    ${
+    var regEmail = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+    $(function () {
+        $('#joinButton').click(function () {
+            if (!/^([a-zA-Z0-9|가-힣]).{1,8}$/.test($('#nickname').val())) {
+                alert("닉네임은 한글, 영문, 숫자만 가능하며 2-8자리 까지 가능 합니다");
+                return false;
+            }
+
+            if(regEmail.test($('#email').val()) == false){
+                alert('이메일 형식이 맞지 않습니다');
+                return false;
+            }
+            if($('#aggrement').is(":checked") == false){
+                alert('개인정보 수집 및 이용에 동의 항목이 체크 되어 있지 않습니다');
+                return false;
+            }
+            var send_data = {"nick_name" : $('#nickname').val(),
+                                 "kakao_key"     : $('#kakao').val(),
+                                 "email"     : $('#email').val()
+                }
+            $.ajax({
+
+                type: "POST",
+                url: "{% url 'user:join' %}",
+                data: JSON.stringify(send_data),
+
+                dataType: "json",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Content-type", "application/json");
+                    xhr.setRequestHeader("PleasyPrivatKey", "PleasyDevGroup");
+                    xhr.setRequestHeader("PleasyPhoneGroup", "Android");
+                },
+                success: function (response) {
+                    if (response.data.CODE == "succes0001"){
+                        alert("회원가입 완료")
+                        window.location.href = '/'
+                    } else if (response){
+                        console.log(response)
 
                     }
-                }
-                form.classList.add('was-validated');
-            }, false);
+                },
+                error: function (request, status, error) {
+                },
+            });
 
         });
-    }, false);
+    });
 
 </script>

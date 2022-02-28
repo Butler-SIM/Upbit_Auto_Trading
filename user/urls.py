@@ -9,7 +9,9 @@ app_name = 'user'
 
 urlpatterns = [
     path('', user, name='user'),
-    path('login', Login.as_view(), name='login'),
-    path('join', Join.as_view(), name='join'),
+    path('login', LoginView.as_view(), name='login'),
+    path('join', JoinView.as_view(), name='join'),
+    path('kakakLogin', KakaoSignInView.as_view(), name='KakaoSignInView'),
+    path('accounts/signin/kakao/callback', KaKaoSignInCallBackView.as_view(), name='KaKaoSignInCallBackView'),
 
 ]
