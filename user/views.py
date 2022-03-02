@@ -18,7 +18,10 @@ from user.serializer import UserModelSerializer
 def user(request):
     return render(request, 'index.html')
 
-
+"""
+로그인
+/user/Login
+"""
 class LoginView(generics.ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
@@ -30,7 +33,10 @@ class LoginView(generics.ListCreateAPIView):
 
         return JsonResponse(json_success("S0004", {"CODE": "succes1111"}), status=status.HTTP_200_OK)
 
-
+"""
+회원가입
+/user/join
+"""
 class JoinView(generics.ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
@@ -50,7 +56,10 @@ class JoinView(generics.ListCreateAPIView):
         else:
             return JsonResponse(json_error("E0003"), status=status.HTTP_200_OK)
 
-
+"""
+카카오 로그인
+/user/kakaoLogin
+"""
 class KakaoSignInView(generics.ListCreateAPIView):
     def get(self, request):
         app_key = kakao_api_key
@@ -108,7 +117,10 @@ class KaKaoSignInCallBackView(generics.ListCreateAPIView):
 
         return redirect(reverse("mainapp:main"))
 
-
+"""
+마이 페이지
+/user/my_page
+"""
 class MyPageView(generics.ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         try:
@@ -122,15 +134,10 @@ class MyPageView(generics.ListCreateAPIView):
         except Exception:
             return render(request, 'login.html')
 
-    # def put(self, request, *args, **kwargs):
-    #     print(request.data)
-    #     if request.data['status'] == '0' :
-    #         request.data.update(auto_trading_status = 1)
-    #     else:
-    #         request.data.update(auto_trading_status = 0)
-    #     return JsonResponse(json_success("S0004", {"CODE": "succes0001"}), status=status.HTTP_200_OK)
-
-
+"""
+자동매매 설정
+/user/trading_switch
+"""
 @api_view(["PUT"])
 def trading_switch(request):
     try :
@@ -144,4 +151,4 @@ def trading_switch(request):
 
 
     except Exception:
-        pass
+        return JsonResponse(json_success("S0004", {"CODE": "error4001"}), status=status.HTTP_200_OK)
