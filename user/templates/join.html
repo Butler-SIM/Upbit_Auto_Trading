@@ -63,8 +63,6 @@
                 dataType: "json",
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader("Content-type", "application/json");
-                    xhr.setRequestHeader("PleasyPrivatKey", "PleasyDevGroup");
-                    xhr.setRequestHeader("PleasyPhoneGroup", "Android");
                 },
                 success: function (response) {
                     if (response.data.CODE == "succes0001"){

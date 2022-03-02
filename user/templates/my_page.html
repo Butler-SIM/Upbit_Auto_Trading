@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include "head.html" %}
+{% include "header.html" %}
+<body>
+
+<section id="hero" class="d-flex align-items-center">
+
+    <div class="trading_switch-area" style="margin: 0 auto">
+        <a href="javascript:void(0)" values="{{ auto_trading_status }}" id="trading_switch" class="btn-about" style="background-color: #71c445">자동매매</a>
+    </div>
+    {{ auto_trading_status }}
+</section>
+</body>
+</html>
+
+<script>
+
+    if ($('#trading_switch').val() == '0') {
+
+        $('#trading_switch').css("background-color", "#71C445FF");
+        $('#trading_switch').text('자동매매 시작');
+    } else {
+        $('#trading_switch').css("background-color", "rgba(225,0,81,0.96)");
+        $('#trading_switch').text('자동매매 종료');
+
+    }
+
+    $(function () {
+        $('#trading_switch').click(function () {
+            $.ajax({
+                type: "PUT",
+                url: "{% url 'user:trading_switch' %}",
+                data: JSON.stringify({'status': $('#trading_switch').val()}),
+
+                dataType: "json",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Content-type", "application/json");
+                },
+                success: function (response) {
+                    if (response.data.CODE == "succes1001") {
+                        $('#trading_switch').css("background-color", "rgba(225,0,81,0.96)");
+                        $('#trading_switch').text('자동매매 종료');
+                        $('#trading_switch').val('1')
+
+                    } else if (response.data.CODE == "succes1002") {
+                        $('#trading_switch').css("background-color", "#71C445FF");
+                        $('#trading_switch').text('자동매매 시작');
+                        $('#trading_switch').val('0')
+
+                    }
+                },
+                error: function (request, status, error) {
+                },
+            });
+
+        });
+    });
+</script>

@@ -1,4 +1,3 @@
-
 from django.contrib import admin
 from django.urls import path
 
@@ -11,7 +10,9 @@ urlpatterns = [
     path('', user, name='user'),
     path('login', LoginView.as_view(), name='login'),
     path('join', JoinView.as_view(), name='join'),
-    path('kakakLogin', KakaoSignInView.as_view(), name='KakaoSignInView'),
+    path('kakaoLogin', KakaoSignInView.as_view(), name='KakaoSignInView'),
     path('accounts/signin/kakao/callback', KaKaoSignInCallBackView.as_view(), name='KaKaoSignInCallBackView'),
+    path('my_page', MyPageView.as_view(), name='my_page'),
+    path('trading_switch', trading_switch, name='trading_switch'),
 
 ]
