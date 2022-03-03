@@ -5,26 +5,25 @@
 <body>
 
 <section id="hero" class="d-flex align-items-center">
-
-    <div class="trading_switch-area" style="margin: 0 auto">
-        <a href="javascript:void(0)" values="{{ auto_trading_status }}" id="trading_switch" class="btn-about" style="background-color: #71c445">자동매매</a>
+    {% if "0" == auto_trading_status %}
+        <div class="trading_switch-area" style="margin: 0 auto">
+            <a href="javascript:void(0)" values="{{ auto_trading_status }}" id="trading_switch" class="btn-about"
+               style="background-color: #71c445">자동매매 시작</a>
+        </div>
+    {% else%}
+        <div class="trading_switch-area" style="margin: 0 auto">
+        <a href="javascript:void(0)" values="{{ auto_trading_status }}" id="trading_switch" class="btn-about"
+           style="background-color: rgba(225,0,81,0.96)">자동매매 종료</a>
     </div>
-    {{ auto_trading_status }}
+    {% endif %}
+
+
 </section>
 </body>
 </html>
 
 <script>
 
-    if ($('#trading_switch').val() == '0') {
-
-        $('#trading_switch').css("background-color", "#71C445FF");
-        $('#trading_switch').text('자동매매 시작');
-    } else {
-        $('#trading_switch').css("background-color", "rgba(225,0,81,0.96)");
-        $('#trading_switch').text('자동매매 종료');
-
-    }
 
     $(function () {
         $('#trading_switch').click(function () {

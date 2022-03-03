@@ -2,7 +2,7 @@
 from django.shortcuts import render
 import pyupbit
 # Create your views here.
-from server_settings.settings.deploy import *
+from config.settings.deploy import *
 
 
 from user.models import UserModel

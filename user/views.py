@@ -8,20 +8,27 @@ from django.urls import reverse
 from rest_framework import status, generics
 from rest_framework.decorators import api_view
 
+import upbit
 from json_response import json_success, json_error
-from server_settings.settings.deploy import *
+from config.settings.deploy import *
 from upbit.tradingTest import auto_trading
 from user.models import UserModel
 from user.serializer import UserModelSerializer
+import time
+import pyupbit
+import datetime
 
 
 def user(request):
     return render(request, 'index.html')
 
+
 """
 로그인
 /user/Login
 """
+
+
 class LoginView(generics.ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
@@ -33,10 +40,13 @@ class LoginView(generics.ListCreateAPIView):
 
         return JsonResponse(json_success("S0004", {"CODE": "succes1111"}), status=status.HTTP_200_OK)
 
+
 """
 회원가입
 /user/join
 """
+
+
 class JoinView(generics.ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
@@ -56,10 +66,13 @@ class JoinView(generics.ListCreateAPIView):
         else:
             return JsonResponse(json_error("E0003"), status=status.HTTP_200_OK)
 
+
 """
 카카오 로그인
 /user/kakaoLogin
 """
+
+
 class KakaoSignInView(generics.ListCreateAPIView):
     def get(self, request):
         app_key = kakao_api_key
@@ -112,15 +125,17 @@ class KaKaoSignInCallBackView(generics.ListCreateAPIView):
         # 회원이 아닌 경우 회원가입 페이지로 넘김
         else:
             request.session['enc_kakao_id'] = kakao_key
-            print(request.session['enc_kakao_id'])
             return redirect(reverse("user:join"))
 
         return redirect(reverse("mainapp:main"))
+
 
 """
 마이 페이지
 /user/my_page
 """
+
+
 class MyPageView(generics.ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         try:
@@ -134,21 +149,131 @@ class MyPageView(generics.ListCreateAPIView):
         except Exception:
             return render(request, 'login.html')
 
+
 """
 자동매매 설정
 /user/trading_switch
 """
+
+
 @api_view(["PUT"])
 def trading_switch(request):
-    try :
+    try:
         user_model = UserModel.objects.filter(kakao_key=request.session['kakao_id'])
         if request.data['status'] == '0':
-            user_model.update(auto_trading_status = '1')
+            user_model.update(auto_trading_status='1')
+            auto_trading()
             return JsonResponse(json_success("S0004", {"CODE": "succes1001"}), status=status.HTTP_200_OK)
         else:
-            user_model.update(auto_trading_status = '0')
+            auto_trading()
+            user_model.update(auto_trading_status='0')
             return JsonResponse(json_success("S0004", {"CODE": "succes1002"}), status=status.HTTP_200_OK)
 
 
     except Exception:
         return JsonResponse(json_success("S0004", {"CODE": "error4001"}), status=status.HTTP_200_OK)
+
+
+"""
+자동매매 로직
+"""
+
+access = upbit_access_key
+secret = upbit_secret_key
+
+
+def get_target_price(ticker, k):
+    """변동성 돌파 전략으로 매수 목표가 조회"""
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=2)
+    target_price = df.iloc[0]['close'] + (df.iloc[0]['high'] - df.iloc[0]['low']) * k
+    return target_price
+
+
+def get_start_time(ticker):
+    """시작 시간 조회"""
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=1)
+    start_time = df.index[0]
+    return start_time
+
+
+def get_ma15(ticker):
+    """15일 이동 평균선 조회"""
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=15)
+    ma15 = df['close'].rolling(15).mean().iloc[-1]
+    return ma15
+
+
+def get_balance(ticker):
+    """잔고 조회"""
+    balances = upbit.get_balances()
+    for b in balances:
+        if b['currency'] == ticker:
+            if b['balance'] is not None:
+                return float(b['balance'])
+            else:
+                return 0
+    return 0
+
+
+def get_current_price(ticker):
+    """현재가 조회"""
+    return pyupbit.get_orderbook(ticker=ticker)["orderbook_units"][0]["ask_price"]
+
+
+def auto_trading():
+    # 로그인
+    upbit = pyupbit.Upbit(access, secret)
+    print("autotrade start")
+    user_model = UserModel.objects.get(id=1)
+
+    print("0")
+    try:
+        now = datetime.datetime.now()
+        start_time = get_start_time("KRW-BTC")
+        end_time = start_time + datetime.timedelta(days=1)
+
+        if start_time < now < end_time - datetime.timedelta(seconds=10):
+            target_price = get_target_price("KRW-BTC", 0.5)
+            ma15 = get_ma15("KRW-BTC")
+            current_price = get_current_price("KRW-BTC")
+            if target_price < current_price and ma15 < current_price:
+                krw = get_balance("KRW")
+                if krw > 5000:
+                    buy_result = upbit.buy_market_order("KRW-BTC", krw * 0.9995)
+                    print("1")
+
+        else:
+            btc = get_balance("BTC")
+            if btc > 0.00008:
+                sell_result = upbit.sell_market_order("KRW-BTC", btc * 0.9995)
+                print("2")
+
+        time.sleep(1)
+    except Exception as e:
+        print(e)
+        print("3")
+        time.sleep(1)
+
+
+def do_crawl():
+    url = "https://api.upbit.com/v1/market/all"
+
+    querystring = {"isDetails": "false"}
+
+    headers = {"Accept": "application/json"}
+
+    response = requests.request("GET", url, headers=headers, params=querystring).json()
+
+    # print(response)
+    result = {}
+    for item in response:
+        coin_data = item
+        # print(coin_data)
+        coin_korean = coin_data['korean_name']
+        coin_symbol = coin_data['market'][coin_data['market'].find('-') + 1:]
+        # print(coin_symbol)
+        result[coin_symbol] = coin_korean
+        # result.append({ 'coinKorean': coin_korean, 'coinSymbol': coin_symbol })
+    print("upbit do_crawl 완료")
+    print("result : ", result)
+    return result
