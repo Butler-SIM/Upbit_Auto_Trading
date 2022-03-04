@@ -1,3 +1,5 @@
+import json
+
 import bcrypt
 import requests
 from django.http import JsonResponse
@@ -141,7 +143,7 @@ class MyPageView(generics.ListCreateAPIView):
         try:
             user_model = UserModel.objects.get(kakao_key=request.session['kakao_id'])
             model = {'auto_trading_status': user_model.auto_trading_status}
-
+            test_Crawler()
             return render(request, 'my_page.html', model)
 
         except user_model.DoesNotExist:
@@ -162,10 +164,10 @@ def trading_switch(request):
         user_model = UserModel.objects.filter(kakao_key=request.session['kakao_id'])
         if request.data['status'] == '0':
             user_model.update(auto_trading_status='1')
-            auto_trading()
+
             return JsonResponse(json_success("S0004", {"CODE": "succes1001"}), status=status.HTTP_200_OK)
         else:
-            auto_trading()
+
             user_model.update(auto_trading_status='0')
             return JsonResponse(json_success("S0004", {"CODE": "succes1002"}), status=status.HTTP_200_OK)
 
@@ -277,3 +279,25 @@ def do_crawl():
     print("upbit do_crawl 완료")
     print("result : ", result)
     return result
+
+
+def test_Crawler():
+
+
+    custom_header = {
+        'referer': 'http://http://finance.daum.net/quotes/A048410#home',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36'}
+
+    # 해당 접속 사이트가 아닌 원본데이터가 오는 url 추적. network에서 가지고 온다.
+    url = "http://finance.daum.net/api/search/ranks?limit=10"
+
+    req = requests.get(url, headers=custom_header)  # custom_header를 사용하지 않으면 접근 불가
+
+    if req.status_code == requests.codes.ok:
+        print("접속 성공")
+        stock_data = json.loads(req.text)  # json에 반환된 데이터가 들어가 있다.
+        for rank in stock_data['data']:  # stock_data는 'data' key값에 모든 정보가 들어가 있다.
+            print(rank['rank'], rank['symbolCode'], rank['name'], rank['tradePrice'])
+
+    else:
+        print("Error code")
