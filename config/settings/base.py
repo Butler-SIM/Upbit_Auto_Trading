@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os, pymysql
 from pathlib import Path
 
+from celery import Celery
+
 pymysql.install_as_MySQLdb()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -112,6 +114,7 @@ algorithm='HS256'
 ALLOWED_HOSTS = ['*']
 
 
+
 SCHEDULE_MINUTE = 60
 SCHEDULE_HOUR = 60 * SCHEDULE_MINUTE
 SCHEDULE_DAY = 24 * SCHEDULE_HOUR
@@ -126,3 +129,4 @@ CELERY_BEAT_SCHEDULE = {
         # 'args': (4, 4)
     }
 }
+

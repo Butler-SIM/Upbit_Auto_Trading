@@ -5,7 +5,7 @@ from celery import Celery
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.base')
-app = Celery('proj')
+app = Celery('upbit_auto_trading')
 
 # 문자열로 등록은 Celery Worker가 자식 프로세스에게 피클링하지 하지 않아도 되다고 알림
 # namespace = 'CELERY'는 Celery관련 세팅 파일에서 변수 Prefix가 CELERY_ 라고 알림
