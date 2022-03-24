@@ -1,7 +1,7 @@
 from django.shortcuts import render
 import pyupbit
 # Create your views here.
-from server_settings.settings.deploy import pubkey, private
+
 import rsa
 
 
