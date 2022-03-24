@@ -2,7 +2,7 @@ from cryptography.fernet import Fernet
 from django.shortcuts import render
 import pyupbit
 # Create your views here.
-from server_settings.settings.deploy import *
+
 import rsa
 
 from user.models import UserModel
