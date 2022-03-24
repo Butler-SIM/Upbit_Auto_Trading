@@ -4,6 +4,7 @@ from celery import shared_task
 
 @shared_task
 def add():
+    print("celery!!!!!!!")
     return "celery test"
 
 
