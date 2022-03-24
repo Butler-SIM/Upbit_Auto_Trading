@@ -1,0 +1,136 @@
+version: "3.7"
+services:
+  nginxproxy:
+    image: nginx:1.21.4
+    networks:
+      - network
+    ports:
+      - 80:80
+        #  - 443:443
+    volumes:
+      - /home/ubuntu/source/nginx.conf:/etc/nginx/nginx.conf
+        #- /home/ubuntu/certbot-etc:/etc/letsencrypt
+      - static:/data/static
+      - media:/data/media
+      - /home/ubuntu/myweb:/usr/share/nginx/html
+    depends_on:
+      # - mariadb
+      - django_gunicorn
+    logging: 
+        driver: awslogs
+        options:
+            awslogs-group: "app/log"
+            awslogs-region: "ap-northeast-2" 
+            awslogs-stream: "web/error"
+
+  # nginx:
+  #   image: nginx:1.20.0
+  #   networks:
+  #     - network
+  #   volumes:
+  #   - /home/ubuntu/myweb:/usr/share/nginx/html
+
+  redis:
+    image: redis:6.2.5
+    networks:
+      - network
+    ports:
+      - "6379:6379"
+    sysctls:
+        net.core.somaxconn: "4096"
+
+  # mariadb:
+  #   image: mariadb:10.5
+  #   networks:
+  #     - network
+  #   volumes:
+  #     - database:/var/lib/mysql
+  #   secrets:
+  #     - MYSQL_PASSWORD
+  #     - MYSQL_ROOT_PASSWORD
+  #   ports:
+  #     - '3306:3306'
+  #   environment:
+  #     MYSQL_DATABASE: django
+  #     MYSQL_USER: kwon
+  #     MYSQL_PASSWORD_FILE: /run/secrets/MYSQL_PASSWORD
+  #     MYSQL_ROOT_PASSWORD_FILE: /run/secrets/MYSQL_ROOT_PASSWORD
+
+  django_gunicorn:
+    image: django-api:1.1.5
+    networks:
+      - network
+    volumes:
+      - static:/home/pleasy_api/staticfiles
+      - media:/home/pleasy_api/media
+    secrets:
+      - MYSQL_PASSWORD
+      - DJANGO_SECRET_KEY
+    links:
+      - redis
+    env_file:
+      - /home/ubuntu/test.env
+    # depends_on:
+    #   - mariadb
+
+  daphne:
+    image: django-api:1.1.5
+    networks:
+      - network
+    volumes:
+      - static:/home/pleasy_api/staticfiles
+      - media:/home/pleasy_api/media
+    secrets:
+      - MYSQL_PASSWORD
+      - DJANGO_SECRET_KEY
+    command: bash -c "daphne -b 0.0.0.0 -p 8000 api_server.asgi:application"
+    links:
+      - redis
+    depends_on:
+      - redis
+    env_file:
+      - /home/ubuntu/test.env
+    #  - mariadb
+
+        # certbot:
+        #  image: certbot/certbot:v1.17.0
+        # deploy:
+        #restart_policy:
+        #  condition: on-failure
+        #  delay: 100s
+        #  max_attempts: 1
+        # networks:
+        # - network
+        #volumes:
+        # - /home/ubuntu/certbot-etc:/etc/letsencrypt
+        # - /home/ubuntu/myweb:/usr/share/nginx/html
+          #command: certonly --webroot --webroot-path=/usr/share/nginx/html --email toqurdml56@naver.com --agree-tos --no-eff-email -d pleasy.co.kr -d www.pleasy.co.kr --force-renewal
+
+  # jenkins:
+  #     image: jenkins/jenkins:lts
+  #     container_name: jenkins_cicd
+  #     volumes:
+  #         - /var/run/docker.sock:/var/run/docker.sock
+  #         - /jenkins:/var/jenkins_home
+  #     ports:
+  #         - "8080:8080"
+  #     privileged: true
+  #     user: root
+
+networks:
+  network:
+
+volumes:
+  static:
+  database:
+  media:
+
+secrets:
+  DJANGO_SECRET_KEY:
+    external: true
+  MYSQL_PASSWORD:
+    external: true
+  MYSQL_ROOT_PASSWORD:
+    external: true
+
+
