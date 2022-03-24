@@ -6,22 +6,65 @@
 {% include "header.html" %}
 
 <body>
-  <!-- ======= Hero Section ======= -->
-  <section id="hero" class="d-flex align-items-center">
+<!-- ======= Hero Section ======= -->
+<section id="hero" class="d-flex align-items-center">
     <div class="container d-flex flex-column align-items-center" data-aos="zoom-in" data-aos-delay="100">
+        <div class="chart-area" style="width: 700px; height: 220px;display: flex ">
+            <div class="tradingview-widget-container">
+              <div class="tradingview-widget-container__widget"></div>
+              <div class="tradingview-widget-copyright">TradingView 제공 <a href="https://kr.tradingview.com/symbols/FOREXCOM-NSXUSD/" rel="noopener" target="_blank"><span class="blue-text">NSXUSD 쿼트</span></a></div>
+              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+              {
+              "symbol": "FOREXCOM:NSXUSD",
+              "width": 350,
+              "height": 220,
+              "locale": "kr",
+              "dateRange": "1D",
+              "colorTheme": "light",
+              "trendLineColor": "rgba(241, 194, 50, 1)",
+              "underLineColor": "rgba(255, 229, 153, 0.3)",
+              "underLineBottomColor": "rgba(41, 98, 255, 0)",
+              "isTransparent": false,
+              "autosize": false,
+              "largeChartUrl": ""
+            }
+              </script>
+            </div>
+            <!-- TradingView Widget BEGIN -->
+            <div class="tradingview-widget-container">
+              <div class="tradingview-widget-container__widget"></div>
+              <div class="tradingview-widget-copyright">트레이딩뷰 제공 <a href="https://kr.tradingview.com/symbols/BTCUSDT/?exchange=BINANCE" rel="noopener" target="_blank"><span class="blue-text">BTCUSDT환율</span></a></div>
+              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+              {
+              "symbol": "BINANCE:BTCUSDT",
+              "width": "350",
+              "height": "220",
+              "locale": "kr",
+              "dateRange": "1D",
+              "colorTheme": "light",
+              "trendLineColor": "rgba(241, 194, 50, 1)",
+              "underLineColor": "rgba(255, 229, 153, 0.3)",
+              "underLineBottomColor": "rgba(41, 98, 255, 0)",
+              "isTransparent": false,
+              "autosize": false,
+              "largeChartUrl": ""
+            }
+              </script>
+            </div>
+            <!-- TradingView Widget END -->
+        </div>
 
 
-
-      <a href="user/login" class="btn-about">로그인</a>
+{#        <a href="user/login" class="btn-about">로그인</a>#}
     </div>
-  </section><!-- End Hero -->
+</section><!-- End Hero -->
 
-  <!-- ======= Footer ======= -->
+<!-- ======= Footer ======= -->
 
 
-  <div id="preloader"></div>
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
+<div id="preloader"></div>
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
 
 
 </body>

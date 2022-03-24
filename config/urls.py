@@ -21,4 +21,5 @@ urlpatterns = [
     path('', include('mainapp.urls')),
     path('user/', include('user.urls')),
     path('upbit/', include('upbit.urls')),
+    path('trading/', include('trading.urls')),
 ]
