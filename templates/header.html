@@ -28,9 +28,11 @@
         </div>
 
         {% if request.session.nick_name %}
-            <div class="user-area" style="width: 200px; color: #f0f0f0; margin-right: 30px;">
+            <div class="user-area" style="width: 300px; color: #f0f0f0; margin-right: 30px;">
                 <span  >닉네임 : {{ request.session.nick_name }}</span>
-                <a style="color: #f0f0f0" href="/user/my_page"><span style="float: right">마이 페이지</span></a>
+                <a style="color: #f0f0f0" href="/user/logout"><span style="float: right">LogOut</span></a>
+                <a style="color: #f0f0f0" href="/user/my_page"><span>마이 페이지</span></a>
+
             </div>
         {% else %}
             <a href="user/login"><span style="color: #f0f0f0; margin-right: 30px;">로그인</span></a>
