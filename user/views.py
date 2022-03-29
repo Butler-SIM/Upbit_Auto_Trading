@@ -45,7 +45,10 @@ class LoginView(generics.ListCreateAPIView):
         return JsonResponse(json_success("S0004", {"CODE": "succes1111"}), status=status.HTTP_200_OK)
 
 
-""" 로그아웃 """
+"""
+로그아웃
+/user/logout    
+ """
 def logout(request):
 
     request.session.clear()
@@ -157,7 +160,7 @@ class MyPageView(generics.ListCreateAPIView):
 
             return render(request, 'my_page.html',model)
 
-        else :
+        else:
             return render(request, 'login.html')
 
 
