@@ -21,7 +21,9 @@ import pyupbit
 import datetime
 from config import *
 
+
 def user(request):
+
     return render(request, 'index.html')
 
 
@@ -41,6 +43,14 @@ class LoginView(generics.ListCreateAPIView):
         # request.data.update(kakao_key=en_kakao_key)
 
         return JsonResponse(json_success("S0004", {"CODE": "succes1111"}), status=status.HTTP_200_OK)
+
+
+""" 로그아웃 """
+def logout(request):
+
+    request.session.clear()
+
+    return redirect('/')
 
 
 """
@@ -140,15 +150,14 @@ class KaKaoSignInCallBackView(generics.ListCreateAPIView):
 
 class MyPageView(generics.ListCreateAPIView):
     def get(self, request, *args, **kwargs):
-        try:
+        if UserModel.objects.get(kakao_key=request.session['kakao_id']) :
+
             user_model = UserModel.objects.get(kakao_key=request.session['kakao_id'])
             model = {'auto_trading_status': user_model.auto_trading_status}
 
-            return render(request, 'my_page.html', model)
+            return render(request, 'my_page.html',model)
 
-        except user_model.DoesNotExist:
-            return render(request, 'login.html')
-        except Exception:
+        else :
             return render(request, 'login.html')
 
 
