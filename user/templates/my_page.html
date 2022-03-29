@@ -17,8 +17,10 @@
     </div>
     {% endif %}
 
+    ;;;
 
 </section>
+
 </body>
 </html>
 
@@ -29,7 +31,7 @@
         $('#trading_switch').click(function () {
             $.ajax({
                 type: "PUT",
-                url: "{% url 'user:trading_switch' %}",
+                url: "{% url 'trading:trading_switch' %}",
                 data: JSON.stringify({'status': $('#trading_switch').val()}),
 
                 dataType: "json",
