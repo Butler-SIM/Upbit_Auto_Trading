@@ -145,13 +145,11 @@ class KaKaoSignInCallBackView(generics.ListCreateAPIView):
         return redirect(reverse("mainapp:main"))
 
 
-"""
-마이 페이지
-/user/my_page
-"""
-
-
 class MyPageView(generics.ListCreateAPIView):
+    """
+    마이 페이지
+    /user/my_page
+    """
     def get(self, request, *args, **kwargs):
         if UserModel.objects.get(kakao_key=request.session['kakao_id']) :
 

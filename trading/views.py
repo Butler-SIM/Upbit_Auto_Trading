@@ -98,7 +98,6 @@ def auto_trading():
     print("autotrade start")
     user_model = UserModel.objects.get(id=1)
 
-    print("0")
     try:
         now = datetime.datetime.now()
         start_time = get_start_time("KRW-BTC")
@@ -112,18 +111,13 @@ def auto_trading():
                 krw = get_balance("KRW")
                 if krw > 5000:
                     buy_result = upbit.buy_market_order("KRW-BTC", krw * 0.9995)
-                    print("1")
 
         else:
             btc = get_balance("BTC")
             if btc > 0.00008:
                 sell_result = upbit.sell_market_order("KRW-BTC", btc * 0.9995)
-                print("2")
-
-        time.sleep(1)
     except Exception as e:
         print(e)
-        print("3")
         time.sleep(1)
 
 
