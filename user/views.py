@@ -13,7 +13,6 @@ from rest_framework.decorators import api_view
 import upbit
 from json_response import json_success, json_error
 from config.settings.deploy import *
-from upbit.tradingTest import auto_trading
 from user.models import UserModel
 from user.serializer import UserModelSerializer
 import time

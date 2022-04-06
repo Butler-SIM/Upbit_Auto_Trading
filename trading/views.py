@@ -13,7 +13,6 @@ from rest_framework.decorators import api_view
 import upbit
 from json_response import json_success, json_error
 from config.settings.deploy import *
-from upbit.tradingTest import auto_trading
 from user.models import UserModel
 from user.serializer import UserModelSerializer
 import time
@@ -118,7 +117,7 @@ def auto_trading():
                 sell_result = upbit.sell_market_order("KRW-BTC", btc * 0.9995)
     except Exception as e:
         print(e)
-        time.sleep(1)
+        pass
 
 
 def do_crawl():
