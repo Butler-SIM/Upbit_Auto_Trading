@@ -4,10 +4,12 @@ import time
 import aiohttp, asyncio, re
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
+
 from trading.views import *
 from asgiref.sync import sync_to_async
 
-sched = BackgroundScheduler()
+sched = BlockingScheduler(timezone='Asia/Seoul')
 
 
 @sync_to_async
@@ -44,16 +46,15 @@ async def auto_trading():
         pass
 
 
+async def test1():
+    print("test1")
+
+
 def secure_transaction_schedule():
     print("schedule!!!!!!!")
     asyncio.run(auto_trading())
 
 
 schedulers = BackgroundScheduler(misfire_grace_time=3600, coalesce=True)
-schedulers.add_job(secure_transaction_schedule, 'interval', minutes=1)
+schedulers.add_job(test1, 'interval', seconds=1)
 schedulers.start()
-
-
-
-
-

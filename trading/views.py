@@ -1,12 +1,7 @@
 import json
-
-import bcrypt
 import requests
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
 
-# Create your views here.
-from django.urls import reverse
 from rest_framework import status, generics
 from rest_framework.decorators import api_view
 
@@ -14,13 +9,15 @@ import upbit
 from json_response import json_success, json_error
 from config.settings.deploy import *
 from user.models import UserModel
-from user.serializer import UserModelSerializer
-import time
 import pyupbit
 import datetime
-from django.shortcuts import render
+import aiohttp, asyncio, re
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
 
-# Create your views here.
+from asgiref.sync import sync_to_async
+
+sched = BlockingScheduler(timezone='Asia/Seoul')
 """
 자동매매 설정
 /user/trading_switch
@@ -164,3 +161,47 @@ def test_Crawler():
 
     else:
         print("Error code")
+
+
+@sync_to_async
+def _getUserModel(pk, status):
+   user_model = UserModel.objects.get(id=1)
+
+   return user_model
+
+
+async def auto_trading():
+    # 로그인
+    upbit = pyupbit.Upbit(access, secret)
+    print("autotrade start")
+    user_model = _getUserModel
+    try:
+        now = datetime.datetime.now()
+        start_time = get_start_time("KRW-BTC")
+        end_time = start_time + datetime.timedelta(days=1)
+
+        if start_time < now < end_time - datetime.timedelta(seconds=10):
+            target_price = get_target_price("KRW-BTC", 0.5)
+            ma15 = get_ma15("KRW-BTC")
+            current_price = get_current_price("KRW-BTC")
+            if target_price < current_price and ma15 < current_price:
+                krw = get_balance("KRW")
+                if krw > 5000:
+                    buy_result = upbit.buy_market_order("KRW-BTC", krw * 0.9995)
+
+        else:
+            btc = get_balance("BTC")
+            if btc > 0.00008:
+                sell_result = upbit.sell_market_order("KRW-BTC", btc * 0.9995)
+    except Exception as e:
+        print(e)
+        pass
+
+
+def secure_transaction_schedule():
+    asyncio.run(auto_trading())
+
+
+schedulers = BackgroundScheduler(misfire_grace_time=3600, coalesce=True)
+schedulers.add_job(secure_transaction_schedule, 'interval', seconds=2.5)
+schedulers.start()

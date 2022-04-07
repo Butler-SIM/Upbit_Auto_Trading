@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_celery_beat',
     'django_celery_results',
+    'cron',
     'mainapp',
     'user',
     'upbit',
@@ -108,18 +109,18 @@ ALLOWED_HOSTS = ['*']
 
 
 
-SCHEDULE_MINUTE = 60
-SCHEDULE_HOUR = 60 * SCHEDULE_MINUTE
-SCHEDULE_DAY = 24 * SCHEDULE_HOUR
-SCHEDULE_WEEK = 7 * SCHEDULE_DAY
-SCHEDULE_MONTH = 30 * SCHEDULE_DAY
-
-CELERY_BEAT_SCHEDULE = {
-    'ga_collect': {
-        'task': 'app.tasks.ga_collect',
-        'schedule': 5 * SCHEDULE_MINUTE,
-        # 'schedule': 2.0,
-        # 'args': (4, 4)
-    }
-}
+# SCHEDULE_MINUTE = 60
+# SCHEDULE_HOUR = 60 * SCHEDULE_MINUTE
+# SCHEDULE_DAY = 24 * SCHEDULE_HOUR
+# SCHEDULE_WEEK = 7 * SCHEDULE_DAY
+# SCHEDULE_MONTH = 30 * SCHEDULE_DAY
+#
+# CELERY_BEAT_SCHEDULE = {
+#     'ga_collect': {
+#         'task': 'app.tasks.ga_collect',
+#         'schedule': 5 * SCHEDULE_MINUTE,
+#         # 'schedule': 2.0,
+#         # 'args': (4, 4)
+#     }
+# }
 
