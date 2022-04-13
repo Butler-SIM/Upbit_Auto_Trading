@@ -23,7 +23,7 @@ class TradingHistoryModel(models.Model):
     coin = models.CharField(max_length=30, default='', verbose_name='코인명')
     purchase_price = models.FloatField(verbose_name='매수가')
     sale_price = models.FloatField(null=True, verbose_name='매도가')
-    roe = models.FloatField(null=True, verbose_name='수익률')  # roe : rate of return
+    roe = models.FloatField(null=True, verbose_name='수익률')  # roe : return on equity
     user_id = models.ForeignKey(UserModel, on_delete=models.CASCADE, null=True, verbose_name='UserIndex')
 
     class Meta:
