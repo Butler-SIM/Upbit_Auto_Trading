@@ -147,10 +147,13 @@ class KaKaoSignInCallBackView(generics.ListCreateAPIView):
 class MyPageView(generics.ListCreateAPIView):
     """
     마이 페이지
-    /user/my_page
+    ---
+     [GET] : 마이 페이지 조회
     """
+
+    @api_view(['GET'])
     def get(self, request, *args, **kwargs):
-        if UserModel.objects.get(kakao_key=request.session['kakao_id']) :
+        if UserModel.objects.get(kakao_key=request.session['kakao_id']):
 
             user_model = UserModel.objects.get(kakao_key=request.session['kakao_id'])
             model = {'auto_trading_status': user_model.auto_trading_status}
@@ -159,6 +162,10 @@ class MyPageView(generics.ListCreateAPIView):
 
         else:
             return render(request, 'login.html')
+
+
+
+
 
 
 

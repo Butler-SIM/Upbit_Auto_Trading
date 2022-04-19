@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_celery_beat',
     'django_celery_results',
+    'drf_yasg',  # drf_yasg
+    'rest_framework',  # djangorestframework
     'cron',
     'mainapp',
     'user',
@@ -103,11 +105,9 @@ SITE_ID = 1
 LOGOUT_REDIRECT_URL = 'accountapp:login'
 
 SECRET_KEY = 'django-insecure-=(z_kahto3n4&4cj5@5_1-ypnkfwkf5(%$9zmpfb^ot4^zj5jr'
-algorithm='HS256'
+algorithm = 'HS256'
 
 ALLOWED_HOSTS = ['*']
-
-
 
 # SCHEDULE_MINUTE = 60
 # SCHEDULE_HOUR = 60 * SCHEDULE_MINUTE
@@ -123,4 +123,3 @@ ALLOWED_HOSTS = ['*']
 #         # 'args': (4, 4)
 #     }
 # }
-
