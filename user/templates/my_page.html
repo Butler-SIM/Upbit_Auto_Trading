@@ -5,22 +5,56 @@
 <body>
 
 <section id="hero" class="d-flex align-items-center">
+
     {% if "0" == auto_trading_status %}
         <div class="trading_switch-area" style="margin: 0 auto">
             <a href="javascript:void(0)" values="{{ auto_trading_status }}" id="trading_switch" class="btn-about"
                style="background-color: #71c445">자동매매 시작</a>
         </div>
-    {% else%}
+    {% else %}
         <div class="trading_switch-area" style="margin: 0 auto">
-        <a href="javascript:void(0)" values="{{ auto_trading_status }}" id="trading_switch" class="btn-about"
-           style="background-color: rgba(225,0,81,0.96)">자동매매 종료</a>
-    </div>
+            <a href="javascript:void(0)" values="{{ auto_trading_status }}" id="trading_switch" class="btn-about"
+               style="background-color: rgba(225,0,81,0.96)">자동매매 종료</a>
+        </div>
     {% endif %}
 
-    ;;;
 
 </section>
-
+<div class="trading_history" style="padding: 100px">
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">코인</th>
+            <th scope="col">매수가</th>
+            <th scope="col">매매가</th>
+            <th scope="col">수익률</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>@mdo</td>
+            <td>@mdo</td>
+        </tr>
+        <tr>
+            <th scope="row">2</th>
+            <td>Jacob</td>
+            <td>Thornton</td>
+            <td>@fat</td>
+            <td>@fat</td>
+        </tr>
+        <tr>
+            <th scope="row">3</th>
+            <td colspan="2">Larry the Bird</td>
+            <td>@twitter</td>
+            <td>@twitter</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 </body>
 </html>
 

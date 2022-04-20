@@ -10,5 +10,4 @@ app_name = 'upbit'
 urlpatterns = [
     path('', upbit, name='upbit'),
 
-
 ]
