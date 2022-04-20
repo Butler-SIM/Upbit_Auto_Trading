@@ -91,7 +91,7 @@ def get_current_price(ticker):
 def auto_trading():
     # 로그인
     upbit = pyupbit.Upbit(access, secret)
-    print("autotrade start")
+    #print("autotrade start")
     user_model = UserModel.objects.get(id=1)
 
     try:
@@ -173,7 +173,7 @@ def _getUserModel(pk, status):
 async def safe_auto_trading():
     # 로그인
     upbit = pyupbit.Upbit(access, secret)
-    print("autotrade start")
+    #print("autotrade start")
     user_model = _getUserModel
     try:
         now = datetime.datetime.now()
@@ -201,7 +201,7 @@ async def safe_auto_trading():
 async def dangerous_auto_trading():
     # 로그인
     upbit = pyupbit.Upbit(access, secret)
-    print("dangerous start")
+    #print("dangerous start")
     user_model = _getUserModel
     try:
         now = datetime.datetime.now()
