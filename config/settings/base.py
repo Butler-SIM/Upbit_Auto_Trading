@@ -18,6 +18,7 @@ pymysql.install_as_MySQLdb()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 INSTALLED_APPS = [
+    'django_apscheduler',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -27,6 +28,9 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_celery_beat',
     'django_celery_results',
+    'drf_yasg',  # drf_yasg
+    'rest_framework',  # djangorestframework
+    'cron',
     'mainapp',
     'user',
     'upbit',
@@ -88,7 +92,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
+
 ]
 ACCOUNT_AUTHENTICATION_METHOD = 'username|email|username_email'
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
@@ -101,24 +105,21 @@ SITE_ID = 1
 LOGOUT_REDIRECT_URL = 'accountapp:login'
 
 SECRET_KEY = 'django-insecure-=(z_kahto3n4&4cj5@5_1-ypnkfwkf5(%$9zmpfb^ot4^zj5jr'
-algorithm='HS256'
+algorithm = 'HS256'
 
 ALLOWED_HOSTS = ['*']
 
-
-
-SCHEDULE_MINUTE = 60
-SCHEDULE_HOUR = 60 * SCHEDULE_MINUTE
-SCHEDULE_DAY = 24 * SCHEDULE_HOUR
-SCHEDULE_WEEK = 7 * SCHEDULE_DAY
-SCHEDULE_MONTH = 30 * SCHEDULE_DAY
-
-CELERY_BEAT_SCHEDULE = {
-    'ga_collect': {
-        'task': 'app.tasks.ga_collect',
-        'schedule': 5 * SCHEDULE_MINUTE,
-        # 'schedule': 2.0,
-        # 'args': (4, 4)
-    }
-}
-
+# SCHEDULE_MINUTE = 60
+# SCHEDULE_HOUR = 60 * SCHEDULE_MINUTE
+# SCHEDULE_DAY = 24 * SCHEDULE_HOUR
+# SCHEDULE_WEEK = 7 * SCHEDULE_DAY
+# SCHEDULE_MONTH = 30 * SCHEDULE_DAY
+#
+# CELERY_BEAT_SCHEDULE = {
+#     'ga_collect': {
+#         'task': 'app.tasks.ga_collect',
+#         'schedule': 5 * SCHEDULE_MINUTE,
+#         # 'schedule': 2.0,
+#         # 'args': (4, 4)
+#     }
+# }

@@ -13,7 +13,6 @@ from rest_framework.decorators import api_view
 import upbit
 from json_response import json_success, json_error
 from config.settings.deploy import *
-from upbit.tradingTest import auto_trading
 from user.models import UserModel
 from user.serializer import UserModelSerializer
 import time
@@ -63,15 +62,30 @@ def logout(request):
 
 
 class JoinView(generics.ListCreateAPIView):
+    """
+    회원가입 [GET, POST]
 
+    ---
+
+    """
     def get(self, request, *args, **kwargs):
-
+        """
+        회원가입 [GET]
+        ---
+        회원가입 페이지(Djnago Template Return)
+        """
         return render(request, 'join.html')
 
-    """ 회원가입 /user/join """
-
     def post(self, request, *args, **kwargs):
-
+        """
+        회원가입 [POST]
+        ---
+        회원가입 성공
+       # 내용
+            - ㅇㅇㅇ : 111
+            - ㄴㄴㄴ : 222
+            - ㅋㅋㅋ : 333
+        """
         serializer = UserModelSerializer(data=request.data)
 
         if serializer.is_valid(raise_exception=True):
@@ -145,15 +159,21 @@ class KaKaoSignInCallBackView(generics.ListCreateAPIView):
         return redirect(reverse("mainapp:main"))
 
 
-"""
-마이 페이지
-/user/my_page
-"""
-
-
 class MyPageView(generics.ListCreateAPIView):
+    """
+    마이 페이지
+    ---
+     [GET] : 마이 페이지 조회
+    """
+
+    @api_view(['GET'])
     def get(self, request, *args, **kwargs):
-        if UserModel.objects.get(kakao_key=request.session['kakao_id']) :
+        """
+        마이 페이지
+        ---
+         [GET] : 마이 페이지 조회
+        """
+        if UserModel.objects.get(kakao_key=request.session['kakao_id']):
 
             user_model = UserModel.objects.get(kakao_key=request.session['kakao_id'])
             model = {'auto_trading_status': user_model.auto_trading_status}
@@ -162,6 +182,10 @@ class MyPageView(generics.ListCreateAPIView):
 
         else:
             return render(request, 'login.html')
+
+
+
+
 
 
 
