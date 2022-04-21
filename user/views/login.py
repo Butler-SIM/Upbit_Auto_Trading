@@ -7,9 +7,11 @@ from django.shortcuts import render, redirect
 
 # Create your views here.
 from django.urls import reverse
+
 from rest_framework import status, generics
 from rest_framework.decorators import api_view
-
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.openapi import Parameter, IN_HEADER, TYPE_STRING
 import upbit
 from json_response import json_success, json_error
 from config.settings.deploy import *
@@ -22,21 +24,20 @@ from config import *
 
 
 def user(request):
-
     return render(request, 'index.html')
 
 
-"""
-로그인
-/user/Login
-"""
-
-
 class LoginView(generics.ListCreateAPIView):
+    """
+    로그인
+    /user/Login
+    """
 
     def get(self, request, *args, **kwargs):
         return render(request, 'login.html')
 
+    @swagger_auto_schema(operation_summary="로그인 POST", operation_description="dddd", request_body=UserModelSerializer,
+                         manual_parameters=swagger_headers)
     def post(self, request, *args, **kwargs):
         # en_kakao_key = encrypt(request.data['kakao'], randomTxt)
         # request.data.update(kakao_key=en_kakao_key)
@@ -44,21 +45,14 @@ class LoginView(generics.ListCreateAPIView):
         return JsonResponse(json_success("S0004", {"CODE": "succes1111"}), status=status.HTTP_200_OK)
 
 
-"""
-로그아웃
-/user/logout    
- """
 def logout(request):
-
+    """
+    로그아웃
+    /user/logout
+    """
     request.session.clear()
 
     return redirect('/')
-
-
-"""
-회원가입
-/user/join
-"""
 
 
 class JoinView(generics.ListCreateAPIView):
@@ -68,9 +62,11 @@ class JoinView(generics.ListCreateAPIView):
     ---
 
     """
+
     def get(self, request, *args, **kwargs):
         """
         회원가입 [GET]
+
         ---
         회원가입 페이지(Djnago Template Return)
         """
@@ -80,12 +76,14 @@ class JoinView(generics.ListCreateAPIView):
         """
         회원가입 [POST]
         ---
-        회원가입 성공
-       # 내용
+        # 내용
             - ㅇㅇㅇ : 111
             - ㄴㄴㄴ : 222
             - ㅋㅋㅋ : 333
+        # ddd
+            - aaaa : 234234
         """
+
         serializer = UserModelSerializer(data=request.data)
 
         if serializer.is_valid(raise_exception=True):
@@ -105,7 +103,7 @@ class JoinView(generics.ListCreateAPIView):
 class KakaoSignInView(generics.ListCreateAPIView):
     def get(self, request):
         app_key = kakao_api_key
-        redirect_uri = 'http://localhost:8000/user/accounts/signin/kakao/callback'
+        redirect_uri = 'http://localhost:8000/user/accounts/signin/kakao/callback'  # 환경 변수 분리 필요
         kakao_auth_api = 'https://kauth.kakao.com/oauth/authorize?response_type=code'
 
         return redirect(
@@ -120,7 +118,7 @@ class KaKaoSignInCallBackView(generics.ListCreateAPIView):
         data = {
             'grant_type': 'authorization_code',
             'client_id': kakao_api_key,
-            'redirection_uri': 'http://localhost:8000/user/accounts/signin/kakao/callback',
+            'redirection_uri': 'http://localhost:8000/user/accounts/signin/kakao/callback',  # 환경 변수 분리 필요
             'code': auth_code
         }
 
@@ -178,14 +176,7 @@ class MyPageView(generics.ListCreateAPIView):
             user_model = UserModel.objects.get(kakao_key=request.session['kakao_id'])
             model = {'auto_trading_status': user_model.auto_trading_status}
 
-            return render(request, 'my_page.html',model)
+            return render(request, 'my_page.html', model)
 
         else:
             return render(request, 'login.html')
-
-
-
-
-
-
-
