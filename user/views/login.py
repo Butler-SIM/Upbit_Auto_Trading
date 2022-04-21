@@ -39,7 +39,6 @@ class LoginView(generics.ListCreateAPIView):
     @swagger_auto_schema(operation_summary="로그인 POST", operation_description="dddd", request_body=UserModelSerializer,
                          manual_parameters=swagger_headers)
     def post(self, request, *args, **kwargs):
-
         # en_kakao_key = encrypt(request.data['kakao'], randomTxt)
         # request.data.update(kakao_key=en_kakao_key)
 
@@ -104,7 +103,7 @@ class JoinView(generics.ListCreateAPIView):
 class KakaoSignInView(generics.ListCreateAPIView):
     def get(self, request):
         app_key = kakao_api_key
-        redirect_uri = 'http://localhost:8000/user/accounts/signin/kakao/callback'      #한경 변수 분리 필요
+        redirect_uri = 'http://localhost:8000/user/accounts/signin/kakao/callback'  # 환경 변수 분리 필요
         kakao_auth_api = 'https://kauth.kakao.com/oauth/authorize?response_type=code'
 
         return redirect(
@@ -119,7 +118,7 @@ class KaKaoSignInCallBackView(generics.ListCreateAPIView):
         data = {
             'grant_type': 'authorization_code',
             'client_id': kakao_api_key,
-            'redirection_uri': 'http://localhost:8000/user/accounts/signin/kakao/callback',     #환경 변수 분리 필요
+            'redirection_uri': 'http://localhost:8000/user/accounts/signin/kakao/callback',  # 환경 변수 분리 필요
             'code': auth_code
         }
 

@@ -1,12 +1,6 @@
-import sched
-import time
-
-import aiohttp, asyncio, re
 from datetime import datetime
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.schedulers.blocking import BlockingScheduler
 
-from trading.views import *
+from trading.views.trading import *
 from asgiref.sync import sync_to_async
 
 sched = BlockingScheduler(timezone='Asia/Seoul')

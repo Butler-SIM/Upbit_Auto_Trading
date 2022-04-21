@@ -18,29 +18,6 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from asgiref.sync import sync_to_async
 
 sched = BlockingScheduler(timezone='Asia/Seoul')
-"""
-자동매매 설정
-/user/trading_switch
-"""
-
-
-@api_view(["PUT"])
-def trading_switch(request):
-    try:
-        user_model = UserModel.objects.filter(kakao_key=request.session['kakao_id'])
-        if request.data['status'] == '0':
-            user_model.update(auto_trading_status='1')
-
-            return JsonResponse(json_success("S0004", {"CODE": "succes1001"}), status=status.HTTP_200_OK)
-        else:
-
-            user_model.update(auto_trading_status='0')
-            return JsonResponse(json_success("S0004", {"CODE": "succes1002"}), status=status.HTTP_200_OK)
-
-
-    except Exception:
-        return JsonResponse(json_success("S0004", {"CODE": "error4001"}), status=status.HTTP_200_OK)
-
 
 """
 자동매매 로직
