@@ -1,12 +1,6 @@
-import sched
-import time
-
-import aiohttp, asyncio, re
 from datetime import datetime
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.schedulers.blocking import BlockingScheduler
 
-from trading.views import *
+from trading.views.trading import *
 from asgiref.sync import sync_to_async
 
 sched = BlockingScheduler(timezone='Asia/Seoul')
@@ -20,7 +14,7 @@ def save_result(pk, status):
 async def auto_trading():
     # 로그인
     upbit = pyupbit.Upbit(access, secret)
-    print("autotrade start")
+    #print("autotrade start")
     user_model = UserModel.objects.get(id=1)
 
     try:
@@ -46,15 +40,12 @@ async def auto_trading():
         pass
 
 
-async def test1():
-    print("test1")
 
 
 def secure_transaction_schedule():
-    print("schedule!!!!!!!")
+    #print("schedule!!!!!!!")
     asyncio.run(auto_trading())
 
 
 schedulers = BackgroundScheduler(misfire_grace_time=3600, coalesce=True)
-schedulers.add_job(test1, 'interval', seconds=1)
 schedulers.start()

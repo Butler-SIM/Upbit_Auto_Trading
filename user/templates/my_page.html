@@ -8,13 +8,13 @@
 
     {% if "0" == auto_trading_status %}
         <div class="trading_switch-area" style="margin: 0 auto">
-            <a href="javascript:void(0)" values="{{ auto_trading_status }}" id="trading_switch" class="btn-about"
-               style="background-color: #71c445">자동매매 시작</a>
+            <a href="javascript:void(0)" values="{{ safe_trading_status }}" id="trading_switch" class="btn-about"
+               style="background-color: #71c445">안전 매매 시작</a>
         </div>
     {% else %}
         <div class="trading_switch-area" style="margin: 0 auto">
-            <a href="javascript:void(0)" values="{{ auto_trading_status }}" id="trading_switch" class="btn-about"
-               style="background-color: rgba(225,0,81,0.96)">자동매매 종료</a>
+            <a href="javascript:void(0)" values="{{ safe_trading_status }}" id="trading_switch" class="btn-about"
+               style="background-color: rgba(225,0,81,0.96)">안전 매매 종료</a>
         </div>
     {% endif %}
 
@@ -65,7 +65,7 @@
         $('#trading_switch').click(function () {
             $.ajax({
                 type: "PUT",
-                url: "{% url 'trading:trading_switch' %}",
+                url: "{% url 'user:trading_switch' %}",
                 data: JSON.stringify({'status': $('#trading_switch').val()}),
 
                 dataType: "json",
@@ -73,12 +73,12 @@
                     xhr.setRequestHeader("Content-type", "application/json");
                 },
                 success: function (response) {
-                    if (response.data.CODE == "succes1001") {
+                    if (response.data.CODE == "success1001") {
                         $('#trading_switch').css("background-color", "rgba(225,0,81,0.96)");
                         $('#trading_switch').text('자동매매 종료');
                         $('#trading_switch').val('1')
 
-                    } else if (response.data.CODE == "succes1002") {
+                    } else if (response.data.CODE == "success1002") {
                         $('#trading_switch').css("background-color", "#71C445FF");
                         $('#trading_switch').text('자동매매 시작');
                         $('#trading_switch').val('0')
