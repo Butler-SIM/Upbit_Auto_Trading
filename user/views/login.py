@@ -36,8 +36,8 @@ class LoginView(generics.ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         return render(request, 'login.html')
 
-    @swagger_auto_schema(operation_summary="로그인 POST", operation_description="dddd", request_body=UserModelSerializer,
-                         manual_parameters=swagger_headers)
+    # @swagger_auto_schema(operation_summary="로그인 POST", operation_description="dddd", request_body=UserModelSerializer,
+    #                      manual_parameters=swagger_headers)
     def post(self, request, *args, **kwargs):
         # en_kakao_key = encrypt(request.data['kakao'], randomTxt)
         # request.data.update(kakao_key=en_kakao_key)

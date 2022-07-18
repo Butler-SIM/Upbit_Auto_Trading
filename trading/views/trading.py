@@ -1,10 +1,11 @@
 import json
 import requests
 from django.http import JsonResponse
+from pyupbit import *
 
 from rest_framework import status, generics
 from rest_framework.decorators import api_view
-
+import requests
 import upbit
 from json_response import json_success, json_error
 from config.settings.deploy import *
@@ -68,7 +69,7 @@ def get_current_price(ticker):
 def auto_trading():
     # 로그인
     upbit = pyupbit.Upbit(access, secret)
-    #print("autotrade start")
+    # print("autotrade start")
     user_model = UserModel.objects.get(id=1)
 
     try:
@@ -119,8 +120,6 @@ def do_crawl():
 
 
 def test_Crawler():
-
-
     custom_header = {
         'referer': 'http://http://finance.daum.net/quotes/A048410#home',
         'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36'}
@@ -140,17 +139,57 @@ def test_Crawler():
         print("Error code")
 
 
+def get_start_price(ticker):
+    """
+    시가 조회(한국시간 오전 9시)
+    """
+    print("ticker : ", ticker)
+    try:
+        url = f"https://api.upbit.com/v1/candles/days?market={ticker}&count=1"
+
+        headers = {"Accept": "application/json"}
+        response = requests.get(url, headers=headers)
+
+        return response.json()[0]["opening_price"]
+
+    except Exception as e :
+        print("error ticker : ", ticker)
+        print(e)
+        return 1
+
+def change_rate(ticker):
+    """
+    시가 대비 현재가 상승률
+    :param ticker:
+    :return:
+    """
+
+    result = {}
+    for key, value in ticker.items():
+        result[key] = round(value / get_start_price(key), 3)
+        time.sleep(0.08)
+
+    print("result : ", result)
+    sort_result = (dict(sorted(result.items(), key=lambda x: x[1], reverse=True)))
+    print("sort result : ", sort_result)
+
 @sync_to_async
 def _getUserModel(pk, status):
-   user_model = UserModel.objects.get(id=1)
+    user_model = UserModel.objects.get(id=1)
 
-   return user_model
+    return user_model
 
 
 async def safe_auto_trading():
     # 로그인
     upbit = pyupbit.Upbit(access, secret)
-    #print("autotrade start")
+    krw_all_ticker = get_tickers("KRW")
+    print(krw_all_ticker)
+    current_price = pyupbit.get_current_price(krw_all_ticker)
+    rate = change_rate(current_price)
+
+
+    # print("autotrade start")
     user_model = _getUserModel
     try:
         now = datetime.datetime.now()
@@ -178,7 +217,7 @@ async def safe_auto_trading():
 async def dangerous_auto_trading():
     # 로그인
     upbit = pyupbit.Upbit(access, secret)
-    #print("dangerous start")
+    # print("dangerous start")
     user_model = _getUserModel
     try:
         now = datetime.datetime.now()
@@ -208,5 +247,5 @@ def secure_transaction_schedule():
 
 
 schedulers = BackgroundScheduler(misfire_grace_time=3600, coalesce=True)
-schedulers.add_job(secure_transaction_schedule, 'interval', seconds=2.5)
+schedulers.add_job(secure_transaction_schedule, 'interval', seconds=10)
 schedulers.start()
