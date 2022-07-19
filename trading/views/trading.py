@@ -2,6 +2,7 @@ import json
 import requests
 from django.http import JsonResponse
 from pyupbit import *
+from datetime import datetime, timedelta, date
 
 from rest_framework import status, generics
 from rest_framework.decorators import api_view
@@ -9,9 +10,9 @@ import requests
 import upbit
 from json_response import json_success, json_error
 from config.settings.deploy import *
+from trading.models import TradingHistoryModel
 from user.models import UserModel
 import pyupbit
-import datetime
 import aiohttp, asyncio, re
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -143,7 +144,7 @@ def get_start_price(ticker):
     """
     시가 조회(한국시간 오전 9시)
     """
-    print("ticker : ", ticker)
+
     try:
         url = f"https://api.upbit.com/v1/candles/days?market={ticker}&count=1"
 
@@ -155,7 +156,8 @@ def get_start_price(ticker):
     except Exception as e :
         print("error ticker : ", ticker)
         print(e)
-        return 1
+        return 1.00001
+
 
 def change_rate(ticker):
     """
@@ -163,15 +165,13 @@ def change_rate(ticker):
     :param ticker:
     :return:
     """
-
     result = {}
     for key, value in ticker.items():
         result[key] = round(value / get_start_price(key), 3)
-        time.sleep(0.08)
+        time.sleep(0.06)
 
-    print("result : ", result)
     sort_result = (dict(sorted(result.items(), key=lambda x: x[1], reverse=True)))
-    print("sort result : ", sort_result)
+    return sort_result
 
 @sync_to_async
 def _getUserModel(pk, status):
@@ -187,7 +187,7 @@ async def safe_auto_trading():
     print(krw_all_ticker)
     current_price = pyupbit.get_current_price(krw_all_ticker)
     rate = change_rate(current_price)
-
+    print(rate)
 
     # print("autotrade start")
     user_model = _getUserModel
@@ -217,35 +217,60 @@ async def safe_auto_trading():
 async def dangerous_auto_trading():
     # 로그인
     upbit = pyupbit.Upbit(access, secret)
-    # print("dangerous start")
+    krw_all_ticker = get_tickers("KRW")
+    print(krw_all_ticker)
+    current_price = pyupbit.get_current_price(krw_all_ticker)
+    rate = change_rate(current_price)
+    print(rate)
+    today = date.today()
+    yester_day = today - timedelta(days=1)
+    now_time = datetime.now()
+    if 9 < now_time.hour < 24:
+        # 오전 9~23시59분까지
+        start_time = datetime(int(today.year), int(today.month), int(today.day), 9, 0, 0)
+        end_time = datetime(int(today.year), int(today.month), int(today.day), 23, 59, 59)
+    else:
+        # 24 이후는 전날 09시~ 금일 08시59분
+        start_time = datetime(int(yester_day.year), int(yester_day.month), int(yester_day.day), 9, 0, 0)
+        end_time = datetime(int(today.year), int(today.month), int(today.day), 8, 59, 59)
+    print("start_time", start_time)
+    print("end_time", end_time)
+    today_history = TradingHistoryModel.objects.filter(created_at__range=(start_time, end_time), type='buy')
+
+    if today_history.count() > 4:
+        # 하루 최대 거래 5번까지
+        return False
+
+    for_count = 0
+    for k, v in rate.items():
+        if k in today_history.values('coin'):
+            # 오늘 이미 거래한 코인 이면 더이상 거래 하지 않음
+            continue
+        if 1.022 < rate[k] < 1.15:
+            print(f"kkkkk : {k} valut {v}" )
+            krw = get_balance("KRW")
+        print(f"kkkkk : {k} valut {v}" )
+
+
+        for_count += 1
+        if for_count == 5 :
+            break
+
+    # 시장가 매도 테스트
+    # upbit.sell_market_order("KRW-XRP", 36)
+    # print("autotrade start")
     user_model = _getUserModel
     try:
-        now = datetime.datetime.now()
-        start_time = get_start_time("KRW-BTC")
-        end_time = start_time + datetime.timedelta(days=1)
-
-        if start_time < now < end_time - datetime.timedelta(seconds=10):
-            target_price = get_target_price("KRW-BTC", 0.5)
-            ma15 = get_ma15("KRW-BTC")
-            current_price = get_current_price("KRW-BTC")
-            if target_price < current_price and ma15 < current_price:
-                krw = get_balance("KRW")
-                if krw > 5000:
-                    buy_result = upbit.buy_market_order("KRW-BTC", krw * 0.9995)
-
-        else:
-            btc = get_balance("BTC")
-            if btc > 0.00008:
-                sell_result = upbit.sell_market_order("KRW-BTC", btc * 0.9995)
+        pass
     except Exception as e:
         print(e)
         pass
 
 
 def secure_transaction_schedule():
-    asyncio.run(safe_auto_trading())
+    asyncio.run(dangerous_auto_trading())
 
 
 schedulers = BackgroundScheduler(misfire_grace_time=3600, coalesce=True)
-schedulers.add_job(secure_transaction_schedule, 'interval', seconds=10)
+schedulers.add_job(secure_transaction_schedule, 'interval', seconds=15)
 schedulers.start()
