@@ -50,7 +50,7 @@ def get_ma15(ticker):
     return ma15
 
 
-def get_balance(ticker):
+def get_balance(ticker, upbit):
     """잔고 조회"""
     balances = upbit.get_balances()
     for b in balances:
@@ -180,6 +180,25 @@ def _getUserModel(pk, status):
     return user_model
 
 
+def _get_trading_history():
+    today = date.today()
+    yester_day = today - timedelta(days=1)
+    now_time = datetime.now()
+    if 9 < now_time.hour < 24:
+        # 오전 9~23시59분까지
+        start_time = datetime(int(today.year), int(today.month), int(today.day), 9, 0, 0)
+        end_time = datetime(int(today.year), int(today.month), int(today.day), 23, 59, 59)
+    else:
+        # 24 이후는 전날 09시~ 금일 08시59분
+        start_time = datetime(int(yester_day.year), int(yester_day.month), int(yester_day.day), 9, 0, 0)
+        end_time = datetime(int(today.year), int(today.month), int(today.day), 8, 59, 59)
+    print(f"start_time : {start_time} end_time : {end_time}")
+    history = TradingHistoryModel.objects.filter(created_at__range=(start_time, end_time), type='buy')
+
+    return history
+
+
+
 async def safe_auto_trading():
     # 로그인
     upbit = pyupbit.Upbit(access, secret)
@@ -214,7 +233,7 @@ async def safe_auto_trading():
         pass
 
 
-async def dangerous_auto_trading():
+def dangerous_auto_trading():
     # 로그인
     upbit = pyupbit.Upbit(access, secret)
     krw_all_ticker = get_tickers("KRW")
@@ -222,53 +241,135 @@ async def dangerous_auto_trading():
     current_price = pyupbit.get_current_price(krw_all_ticker)
     rate = change_rate(current_price)
     print(rate)
-    today = date.today()
-    yester_day = today - timedelta(days=1)
-    now_time = datetime.now()
-    if 9 < now_time.hour < 24:
-        # 오전 9~23시59분까지
-        start_time = datetime(int(today.year), int(today.month), int(today.day), 9, 0, 0)
-        end_time = datetime(int(today.year), int(today.month), int(today.day), 23, 59, 59)
-    else:
-        # 24 이후는 전날 09시~ 금일 08시59분
-        start_time = datetime(int(yester_day.year), int(yester_day.month), int(yester_day.day), 9, 0, 0)
-        end_time = datetime(int(today.year), int(today.month), int(today.day), 8, 59, 59)
-    print("start_time", start_time)
-    print("end_time", end_time)
-    today_history = TradingHistoryModel.objects.filter(created_at__range=(start_time, end_time), type='buy')
-
-    if today_history.count() > 4:
-        # 하루 최대 거래 5번까지
-        return False
-
-    for_count = 0
-    for k, v in rate.items():
-        if k in today_history.values('coin'):
-            # 오늘 이미 거래한 코인 이면 더이상 거래 하지 않음
-            continue
-        if 1.022 < rate[k] < 1.15:
-            print(f"kkkkk : {k} valut {v}" )
-            krw = get_balance("KRW")
-        print(f"kkkkk : {k} valut {v}" )
-
-
-        for_count += 1
-        if for_count == 5 :
-            break
-
-    # 시장가 매도 테스트
-    # upbit.sell_market_order("KRW-XRP", 36)
-    # print("autotrade start")
-    user_model = _getUserModel
+    user = UserModel.objects.get(nick_name='가가가')
+    today_history = _get_trading_history()
+    today_buy_coin_list = [i.get('current') for i in today_history.filter(type='buy').values('current')]
+    print("today_history", today_history)
     try:
-        pass
+
+        if today_history.filter(type='buy').count() > 4:
+            # 하루 최대 거래 5번까지
+            return False
+        #전체 계좌 조회
+        balance = upbit.get_balances()
+        print("balance", balance)
+        for_count = 0
+        for k, v in rate.items():
+            print("k ", k)
+            if k in today_buy_coin_list:
+                # 오늘 이미 거래한 코인 이면 더이상 거래 하지 않음
+                print("2222222222222222222k ", k)
+                continue
+            if 1.019 < rate[k] < 1.15:
+                print(f"kkkkk : {k} valut {v}" )
+                my_krw = math.trunc(get_balance("KRW", upbit))
+
+                buy_coin = k.replace('KRW-', "")
+                my_coin = get_balance("ETC", upbit)
+                print("내코인", buy_coin)
+                print("my_coin", my_coin)
+                print("my_krw", my_krw)
+                # 현재가 전액 매수 시장가 주문
+                coin_price =pyupbit.get_current_price(k)
+                coin_buy_count = round(((my_krw - 5000) / coin_price), 4)
+                print('coin_buy_count', coin_buy_count)
+                print('coin_price', coin_price)
+
+                upbit.buy_market_order(k, (my_krw - 5000))
+
+                TradingHistoryModel.objects.create(
+                    coin=buy_coin, purchase_price=coin_price, count=coin_buy_count, user_id=user, type="buy",
+                    current=k, total_price=my_krw
+                )
+                user.dangerous_coin_possession = True
+                user.save()
+                break
+            for_count += 1
+            if for_count == 5 :
+                break
+
     except Exception as e:
         print(e)
         pass
 
 
+def sell_coin():
+    upbit = pyupbit.Upbit(access, secret)
+    user = UserModel.objects.get(nick_name="가가가")
+    my_coin = TradingHistoryModel.objects.filter(type='buy').last()
+    current_price = pyupbit.get_current_price(my_coin.current)
+    sell_coin_count = upbit.get_balance_t(my_coin.current)
+    print(f"current_price = {current_price} my_coin.purchase_price = {my_coin.purchase_price}")
+    avg_buy_price = upbit.get_avg_buy_price(my_coin.coin)
+    rate = (current_price / avg_buy_price)
+
+    print("avg_buy_price : ", avg_buy_price)
+    print("rate : ", rate)
+    print("buy_coin : ", my_coin.current)
+    print("코인팔기")
+    now_time = datetime.now()
+
+    # 시장가 매도
+    if rate > 1.051:
+        # 내가 산 가격보다 5.2% 이상 상승시 시장가 매도
+        print("5.2% 상승 ")
+        try:
+            upbit.sell_market_order(my_coin.current, sell_coin_count)
+            TradingHistoryModel.objects.create(
+                coin=my_coin.coin, sale_price=current_price, count=sell_coin_count, user_id=user, type="sell",
+                current=my_coin.current, roe=rate
+            )
+            user.dangerous_coin_possession = False
+            user.save()
+
+            return False
+        except Exception as e:
+            print(e)
+
+    if rate < 0.986:
+        print("1.4% 하락 ")
+        # 내가 산 가격보다 1.5% 이상 하락시 시장가 매도
+        print(f"코인명 {my_coin.current} 코인 갯수 {sell_coin_count}")
+        upbit.sell_market_order(my_coin.current, sell_coin_count)
+        TradingHistoryModel.objects.create(
+            coin=my_coin.coin, sale_price=current_price, count=sell_coin_count, user_id=user, type="sell",
+            current=my_coin.current, roe=rate
+        )
+        user.dangerous_coin_possession = False
+        user.save()
+        return False
+    if now_time > (my_coin.created_at + timedelta(hours=5)):
+        print("5시간 경과 ")
+        # 매수 후 5시간 넘은 경우 (5.%이상 상승, 1.5%이상 하락이 일어나지 않은경우 현재가 매도도)
+        upbit.sell_market_order(my_coin.current, sell_coin_count)
+        TradingHistoryModel.objects.create(
+            coin=my_coin.coin, sale_price=current_price, count=sell_coin_count, user_id=user, type="sell",
+            current=my_coin.current, roe=rate
+        )
+        user.dangerous_coin_possession = False
+        user.save()
+        return False
+
+
+
+
+
 def secure_transaction_schedule():
-    asyncio.run(dangerous_auto_trading())
+    user = UserModel.objects.get(nick_name='가가가')
+
+    print("user", user.dangerous_coin_possession)
+    today_history = _get_trading_history()
+    print("today_history.filter(type='buy').values('current')",today_history.filter(type='buy').values('current'))
+
+    if not user.dangerous_trading_status:
+        print("자동매매 꺼둠")
+        return False
+    # 포지션 있는 경우
+    if user.dangerous_coin_possession:
+        sell_coin()
+    # 포지션 없는 경우
+    else:
+        dangerous_auto_trading()
 
 
 schedulers = BackgroundScheduler(misfire_grace_time=3600, coalesce=True)
