@@ -272,12 +272,15 @@ def dangerous_auto_trading():
                 upbit.buy_market_order(k, my_krw)
                 sell_coin_count = upbit.get_balance_t(k)
                 avg_buy_price = upbit.get_avg_buy_price(buy_coin)
-                TradingHistoryModel.objects.create(
+                trading = TradingHistoryModel.objects.create(
                     coin=buy_coin, purchase_price=avg_buy_price, count=sell_coin_count, user_id=user, type="buy",
                     current=k, total_price=my_krw
                 )
                 user.dangerous_coin_possession = True
                 user.save()
+                # 슬랙 메세지 보내기
+                slack_post_message(trading)
+
                 break
 
             for_count += 1
@@ -311,12 +314,14 @@ def sell_coin(status=None):
         print("5.2% 상승 ")
         try:
             upbit.sell_market_order(my_coin.current, sell_coin_count)
-            TradingHistoryModel.objects.create(
+            trading = TradingHistoryModel.objects.create(
                 coin=my_coin.coin, sale_price=current_price, count=sell_coin_count, user_id=user, type="sell",
                 current=my_coin.current, roe=rate
             )
             user.dangerous_coin_possession = False
             user.save()
+
+            slack_post_message(trading)
 
             return False
         except Exception as e:
@@ -327,43 +332,55 @@ def sell_coin(status=None):
         # 내가 산 가격보다 1.5% 이상 하락시 시장가 매도
         print(f"코인명 {my_coin.current} 코인 갯수 {sell_coin_count}")
         upbit.sell_market_order(my_coin.current, sell_coin_count)
-        TradingHistoryModel.objects.create(
+
+        trading = TradingHistoryModel.objects.create(
             coin=my_coin.coin, sale_price=current_price, count=sell_coin_count, user_id=user, type="sell",
             current=my_coin.current, roe=rate
         )
+
         user.dangerous_coin_possession = False
         user.save()
+        slack_post_message(trading)
+
         return False
     if now_time > (my_coin.created_at + timedelta(hours=5)):
         print("5시간 경과 ")
         # 매수 후 5시간 넘은 경우 (5.%이상 상승, 1.5%이상 하락이 일어나지 않은경우 현재가 매도)
         upbit.sell_market_order(my_coin.current, sell_coin_count)
+
         TradingHistoryModel.objects.create(
             coin=my_coin.coin, sale_price=current_price, count=sell_coin_count, user_id=user, type="sell",
             current=my_coin.current, roe=rate
         )
+
         user.dangerous_coin_possession = False
         user.save()
+
+        slack_post_message(trading)
+
         return False
 
     if status == 'time_8':
         print("현재 시간 오전 8시 ")
         # 오전 8시부터 9시 까지 자동 매매 꺼둠 보유 한 코인 있다면 현재가 매도
         upbit.sell_market_order(my_coin.current, sell_coin_count)
-        TradingHistoryModel.objects.create(
+
+        trading = TradingHistoryModel.objects.create(
             coin=my_coin.coin, sale_price=current_price, count=sell_coin_count, user_id=user, type="sell",
             current=my_coin.current, roe=rate
         )
+
         user.dangerous_coin_possession = False
         user.save()
+
+        slack_post_message(trading)
+
 
 def secure_transaction_schedule():
     now_time = datetime.now()
     user = UserModel.objects.get(nick_name='가가가')
-    slack_post_message()
     print("user.dangerous_coin_possession : ", user.dangerous_coin_possession)
     today_history = _get_trading_history()
-
 
     # 오전8시부터 9시까지 거래 하지않음
     if 8 == now_time.hour:
