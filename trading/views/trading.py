@@ -10,7 +10,7 @@ import requests
 import upbit
 from json_response import json_success, json_error
 from config.settings.deploy import *
-from slack.views import slack_message
+from slack.views import slack_post_message
 from trading.models import TradingHistoryModel
 from user.models import UserModel
 import pyupbit
@@ -360,7 +360,7 @@ def sell_coin(status=None):
 def secure_transaction_schedule():
     now_time = datetime.now()
     user = UserModel.objects.get(nick_name='가가가')
-    slack_message()
+    slack_post_message()
     print("user.dangerous_coin_possession : ", user.dangerous_coin_possession)
     today_history = _get_trading_history()
 
