@@ -256,7 +256,10 @@ def dangerous_auto_trading():
             if k in today_buy_coin_list:
                 # 오늘 이미 거래한 코인 이면 더이상 거래 하지 않음
                 continue
-            if 1.019 < rate[k] < 1.15:
+            if today_history.filter(type='buy').count() > 7:
+                # 하루 최대 거래 8번까지
+                return False
+            if 1.014 < rate[k] < 1.072:
                 print(f"kkkkk : {k} valut {v}" )
                 my_krw = math.trunc(get_balance("KRW", upbit)) - 5000
 
@@ -313,7 +316,7 @@ def sell_coin(status=None):
         # 내가 산 가격보다 5.2% 이상 상승시 시장가 매도
         print("5.2% 상승 ")
         try:
-            upbit.sell_market_order(my_coin.current, sell_coin_count)
+            sell_coin = upbit.sell_market_order(my_coin.current, sell_coin_count)
             trading = TradingHistoryModel.objects.create(
                 coin=my_coin.coin, sale_price=current_price, count=sell_coin_count, user_id=user, type="sell",
                 current=my_coin.current, roe=rate
@@ -321,17 +324,17 @@ def sell_coin(status=None):
             user.dangerous_coin_possession = False
             user.save()
 
-            slack_post_message(trading)
+            slack_post_message(trading, sell_coin)
 
             return False
         except Exception as e:
             print(e)
 
-    if rate < 0.986:
-        print("1.4% 하락 ")
+    if rate < 0.987:
+        print("1.3% 하락 ")
         # 내가 산 가격보다 1.5% 이상 하락시 시장가 매도
         print(f"코인명 {my_coin.current} 코인 갯수 {sell_coin_count}")
-        upbit.sell_market_order(my_coin.current, sell_coin_count)
+        sell_coin = upbit.sell_market_order(my_coin.current, sell_coin_count)
 
         trading = TradingHistoryModel.objects.create(
             coin=my_coin.coin, sale_price=current_price, count=sell_coin_count, user_id=user, type="sell",
@@ -340,15 +343,15 @@ def sell_coin(status=None):
 
         user.dangerous_coin_possession = False
         user.save()
-        slack_post_message(trading)
+        slack_post_message(trading, sell_coin)
 
         return False
     if now_time > (my_coin.created_at + timedelta(hours=5)):
         print("5시간 경과 ")
         # 매수 후 5시간 넘은 경우 (5.%이상 상승, 1.5%이상 하락이 일어나지 않은경우 현재가 매도)
-        upbit.sell_market_order(my_coin.current, sell_coin_count)
+        sell_coin = upbit.sell_market_order(my_coin.current, sell_coin_count)
 
-        TradingHistoryModel.objects.create(
+        trading = TradingHistoryModel.objects.create(
             coin=my_coin.coin, sale_price=current_price, count=sell_coin_count, user_id=user, type="sell",
             current=my_coin.current, roe=rate
         )
@@ -356,14 +359,14 @@ def sell_coin(status=None):
         user.dangerous_coin_possession = False
         user.save()
 
-        slack_post_message(trading)
+        slack_post_message(trading, sell_coin)
 
         return False
 
     if status == 'time_8':
         print("현재 시간 오전 8시 ")
         # 오전 8시부터 9시 까지 자동 매매 꺼둠 보유 한 코인 있다면 현재가 매도
-        upbit.sell_market_order(my_coin.current, sell_coin_count)
+        sell_coin = upbit.sell_market_order(my_coin.current, sell_coin_count)
 
         trading = TradingHistoryModel.objects.create(
             coin=my_coin.coin, sale_price=current_price, count=sell_coin_count, user_id=user, type="sell",
@@ -373,7 +376,7 @@ def sell_coin(status=None):
         user.dangerous_coin_possession = False
         user.save()
 
-        slack_post_message(trading)
+        slack_post_message(trading, sell_coin)
 
 
 def secure_transaction_schedule():
@@ -395,7 +398,7 @@ def secure_transaction_schedule():
             user.dangerous_trading_status = False
             user.save()
     # 9시가 되면 자동 매매상태 True로 변경
-    elif 9 == now_time:
+    elif 9 == now_time.hour:
         user.dangerous_trading_status = True
         user.save()
 
@@ -403,17 +406,18 @@ def secure_transaction_schedule():
         print("자동매매 꺼둠")
         return False
     # 위험거래 5번 넘어가면 위험거래 상태 False로변경
-    if today_history.filter(type='buy').count() > 4:
-        user.dangerous_trading_status = False
-        user.save()
-        # 하루 최대 거래 5번까지
-        return False
+    # if today_history.filter(type='buy').count() > 4:
+    #     user.dangerous_trading_status = False
+    #     user.save()
+    #     # 하루 최대 거래 5번까지
+    #     return False
 
     # 포지션 있는 경우
     if user.dangerous_coin_possession:
+        print("포지션 있음")
         sell_coin()
     # 포지션 없고 위엄거래 상태가 True인 경우 매수
-    elif user.dangerous_trading_status and user.dangerous_coin_possession:
+    elif user.dangerous_trading_status and not user.dangerous_coin_possession:
         dangerous_auto_trading()
 
 
