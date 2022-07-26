@@ -312,9 +312,9 @@ def sell_coin(status=None):
     now_time = datetime.now()
 
     # 시장가 매도
-    if rate > 1.051:
-        # 내가 산 가격보다 5.2% 이상 상승시 시장가 매도
-        print("5.2% 상승 ")
+    if rate > 1.031:
+        # 내가 산 가격보다 3.1% 이상 상승시 시장가 매도
+        print("3.1% 상승 ")
         try:
             sell_coin = upbit.sell_market_order(my_coin.current, sell_coin_count)
             trading = TradingHistoryModel.objects.create(
@@ -332,7 +332,7 @@ def sell_coin(status=None):
 
     if rate < 0.987:
         print("1.3% 하락 ")
-        # 내가 산 가격보다 1.5% 이상 하락시 시장가 매도
+        # 내가 산 가격보다 1.3% 이상 하락시 시장가 매도
         print(f"코인명 {my_coin.current} 코인 갯수 {sell_coin_count}")
         sell_coin = upbit.sell_market_order(my_coin.current, sell_coin_count)
 
@@ -346,9 +346,9 @@ def sell_coin(status=None):
         slack_post_message(trading, sell_coin)
 
         return False
-    if now_time > (my_coin.created_at + timedelta(hours=5)):
-        print("5시간 경과 ")
-        # 매수 후 5시간 넘은 경우 (5.%이상 상승, 1.5%이상 하락이 일어나지 않은경우 현재가 매도)
+    if now_time > (my_coin.created_at + timedelta(hours=3)):
+        print("3시간 경과 ")
+        # 매수 후 3시간 넘은 경우 (5.%이상 상승, 1.3%이상 하락이 일어나지 않은경우 현재가 매도)
         sell_coin = upbit.sell_market_order(my_coin.current, sell_coin_count)
 
         trading = TradingHistoryModel.objects.create(
@@ -422,5 +422,5 @@ def secure_transaction_schedule():
 
 
 schedulers = BackgroundScheduler(misfire_grace_time=3600, coalesce=True)
-schedulers.add_job(secure_transaction_schedule, 'interval', seconds=15)
+schedulers.add_job(secure_transaction_schedule, 'interval', seconds=20)
 schedulers.start()
