@@ -185,7 +185,7 @@ def _get_trading_history():
     today = date.today()
     yester_day = today - timedelta(days=1)
     now_time = datetime.now()
-    if 9 < now_time.hour < 24:
+    if 9 <= now_time.hour < 24:
         # 오전 9~23시59분까지
         start_time = datetime(int(today.year), int(today.month), int(today.day), 9, 0, 0)
         end_time = datetime(int(today.year), int(today.month), int(today.day), 23, 59, 59)
@@ -195,9 +195,9 @@ def _get_trading_history():
         end_time = datetime(int(today.year), int(today.month), int(today.day), 8, 59, 59)
     #print(f"start_time : {start_time} end_time : {end_time}")
     history = TradingHistoryModel.objects.filter(created_at__range=(start_time, end_time), type='buy')
-
+    print("today_history_ start_time", start_time)
+    print("today_history_ start_time", end_time)
     return history
-
 
 
 async def safe_auto_trading():
@@ -245,7 +245,7 @@ def dangerous_auto_trading():
     user = UserModel.objects.get(nick_name='가가가')
     today_history = _get_trading_history()
     today_buy_coin_list = [i.get('current') for i in today_history.filter(type='buy').values('current')]
-    print("today_history", today_history)
+    print("today_but_count", today_history.count())
     try:
         #전체 계좌 조회
         balance = upbit.get_balances()
@@ -256,10 +256,10 @@ def dangerous_auto_trading():
             if k in today_buy_coin_list:
                 # 오늘 이미 거래한 코인 이면 더이상 거래 하지 않음
                 continue
-            if today_history.filter(type='buy').count() > 7:
-                # 하루 최대 거래 8번까지
+            if today_history.filter(type='buy').count() > 9:
+                # 하루 최대 거래 10번까지
                 return False
-            if 1.014 < rate[k] < 1.072:
+            if 1.016 < rate[k] < 1.077:
                 print(f"kkkkk : {k} valut {v}" )
                 my_krw = math.trunc(get_balance("KRW", upbit)) - 5000
 
@@ -312,7 +312,7 @@ def sell_coin(status=None):
     now_time = datetime.now()
 
     # 시장가 매도
-    if rate > 1.031:
+    if rate > 1.033:
         # 내가 산 가격보다 3.1% 이상 상승시 시장가 매도
         print("3.1% 상승 ")
         try:
@@ -330,8 +330,8 @@ def sell_coin(status=None):
         except Exception as e:
             print(e)
 
-    if rate < 0.987:
-        print("1.3% 하락 ")
+    if rate < 0.985:
+        print("1.5% 하락 ")
         # 내가 산 가격보다 1.3% 이상 하락시 시장가 매도
         print(f"코인명 {my_coin.current} 코인 갯수 {sell_coin_count}")
         sell_coin = upbit.sell_market_order(my_coin.current, sell_coin_count)
