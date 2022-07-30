@@ -256,8 +256,8 @@ def dangerous_auto_trading():
             if k in today_buy_coin_list:
                 # 오늘 이미 거래한 코인 이면 더이상 거래 하지 않음
                 continue
-            if today_history.filter(type='buy').count() > 9:
-                # 하루 최대 거래 10번까지
+            if today_history.filter(type='buy').count() > 14:
+                # 하루 최대 거래 15번까지
                 return False
             if 1.016 < rate[k] < 1.078:
                 print(f"kkkkk : {k} valut {v}" )
