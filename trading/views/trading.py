@@ -312,8 +312,8 @@ def sell_coin(status=None):
     now_time = datetime.now()
 
     # 시장가 매도
-    if rate > 1.038:
-        # 내가 산 가격보다 3.1% 이상 상승시 시장가 매도
+    if rate > 1.034:
+        # 내가 산 가격보다 3.4% 이상 상승시 시장가 매도
         print("3.8% 상승 ")
         try:
             sell_coin = upbit.sell_market_order(my_coin.current, sell_coin_count)
@@ -330,8 +330,8 @@ def sell_coin(status=None):
         except Exception as e:
             print(e)
 
-    if rate < 0.984:
-        print("1.4% 하락 ")
+    if rate < 0.987:
+        print("1..% 하락 ")
         # 내가 산 가격보다 1.3% 이상 하락시 시장가 매도
         print(f"코인명 {my_coin.current} 코인 갯수 {sell_coin_count}")
         sell_coin = upbit.sell_market_order(my_coin.current, sell_coin_count)
