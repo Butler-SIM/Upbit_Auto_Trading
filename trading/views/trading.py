@@ -259,11 +259,14 @@ def dangerous_auto_trading():
             if today_history.filter(type='buy').count() > 14:
                 # 하루 최대 거래 15번까지
                 return False
-            if 1.016 < rate[k] < 1.078:
+            if 1.022 < rate[k] < 1.15:
                 print(f"kkkkk : {k} valut {v}" )
                 my_krw = math.trunc(get_balance("KRW", upbit)) - 5000
 
                 buy_coin = k.replace('KRW-', "")
+                if buy_coin == 'BTT':
+                    # 비트토렌트 매수 하지않음
+                    continue
                 print("구매 할 코인", buy_coin)
                 print("my_krw", my_krw)
                 # 현재가 전액 매수 시장가 주문
@@ -287,7 +290,7 @@ def dangerous_auto_trading():
                 break
 
             for_count += 1
-            if for_count == 5 :
+            if for_count == 10 :
                 break
 
     except Exception as e:
