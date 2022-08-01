@@ -331,6 +331,8 @@ def sell_coin(status=None):
 
             return False
         except Exception as e:
+            user.dangerous_coin_possession = False
+            user.save()
             print(e)
 
     if rate < 0.987:
@@ -366,9 +368,10 @@ def sell_coin(status=None):
 
         return False
 
-    if status == 'time_8':
-        print("현재 시간 오전 8시 ")
+    if status == 'time_8_or_12':
+        print("현재 시간 오전 8시 또는 12시")
         # 오전 8시부터 9시 까지 자동 매매 꺼둠 보유 한 코인 있다면 현재가 매도
+        # 오후 12시부터 18시 까지 자동 매매 꺼둠 보유 한 코인 있다면 현재가 매도
         sell_coin = upbit.sell_market_order(my_coin.current, sell_coin_count)
 
         trading = TradingHistoryModel.objects.create(
@@ -392,7 +395,7 @@ def secure_transaction_schedule():
     if 8 == now_time.hour:
         # 매수 한 코인 있으면 현재가 매도
         if user.dangerous_coin_possession:
-            sell_coin("time_8")
+            sell_coin("time_8_or_12")
             user.dangerous_trading_status = False
             user.save()
         # 매수 한 코인이 없으면
@@ -402,6 +405,23 @@ def secure_transaction_schedule():
             user.save()
     # 9시가 되면 자동 매매상태 True로 변경
     elif 9 == now_time.hour:
+        user.dangerous_trading_status = True
+        user.save()
+
+    # 오후12시부터 18시까지 거래 하지않음
+    if 12 == now_time.hour:
+        # 매수 한 코인 있으면 현재가 매도
+        if user.dangerous_coin_possession:
+            sell_coin("time_8_or_12")
+            user.dangerous_trading_status = False
+            user.save()
+        # 매수 한 코인이 없으면
+        else:
+            # 자동매매 상태 False로 변경
+            user.dangerous_trading_status = False
+            user.save()
+    # 18시가 되면 자동 매매상태 True로 변경
+    elif 18 == now_time.hour:
         user.dangerous_trading_status = True
         user.save()
 
